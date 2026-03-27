@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>용사 젠 - 모래와 피</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@300;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --obsidian: #1A1A1A;
+            --rose: #8B4444;
+            --gold: #C5A059;
+            --font-serif: 'Noto Serif KR', serif;
+            --font-sans: 'Noto Sans KR', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--obsidian);
+            color: #fff;
+            font-family: var(--font-serif);
+            overflow: hidden; /* 스크롤 방지 (페이지 전환용) */
+        }
+
+        /* 공통 섹션 스타일 */
+        section {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: opacity 0.8s ease-in-out, visibility 0.8s;
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        section.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* 1. 첫 화면 (Hero Section) */
+        #hero {
+            background: linear-gradient(to right, rgba(26,26,26,0) 0%, rgba(26,26,26,1) 70%), url('img.png');
+            background-size: cover;
+            background-position: left center;
+            cursor: pointer;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10%;
+        }
+
+        .hero-text {
+            text-align: right;
+        }
+
+        .hero-text h2 {
+            font-family: var(--font-sans);
+            font-size: 1.2rem;
+            color: var(--gold);
+            letter-spacing: 0.5rem;
+            margin-bottom: 10px;
+        }
+
+        .hero-text h1 {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(197, 160, 89, 0.3);
+        }
+
+        .hero-text p {
+            font-size: 1.5rem;
+            color: #ccc;
+            line-height: 1.8;
+            font-style: italic;
+        }
+
+        .click-guide {
+            position: absolute;
+            bottom: 50px;
+            right: 10%;
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            color: var(--rose);
+            animation: blink 2s infinite;
+        }
+
+        /* 2. 선택 화면 (Selection Page) */
+        #selection {
+            flex-direction: column;
+        }
+
+        .select-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+            transition: 0.5s;
+        }
+
+        .select-area:last-child { border-bottom: none; }
+
+        /* 배경 이미지 가상 요소 */
+        .select-area::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('img.png');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.3;
+            transition: 0.8s;
+            filter: grayscale(100%);
+        }
+
+        .select-area:hover::before {
+            transform: scale(1.05);
+            opacity: 0.5;
+            filter: grayscale(0%);
+        }
+
+        .select-area:hover h2 {
+            color: var(--rose);
+            text-shadow: 0 0 15px var(--rose);
+            transform: translateY(-5px);
+        }
+
+        .select-area h2 {
+            position: relative;
+            font-size: 3rem;
+            color: var(--gold);
+            z-index: 10;
+            transition: 0.4s;
+        }
+
+        .area-desc {
+            position: absolute;
+            z-index: 10;
+            margin-top: 80px;
+            font-family: var(--font-sans);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            color: #888;
+        }
+
+        /* 3. 소설 본문 화면 (Story Content) */
+        #content {
+            background-color: var(--obsidian);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 100px 20%;
+            overflow-y: auto;
+        }
+
+        .story-header {
+            text-align: center;
+            margin-bottom: 60px;
+            border-bottom: 1px solid var(--gold);
+            padding-bottom: 20px;
+            width: 100%;
+        }
+
+        .story-header h3 { color: var(--gold); font-family: var(--font-sans); margin-bottom: 10px; }
+        .story-header h1 { font-size: 2.5rem; color: #fff; }
+
+        .story-body {
+            line-height: 2;
+            font-size: 1.1rem;
+            color: #ddd;
+            width: 100%;
+            white-space: pre-wrap; /* 줄바꿈 유지 */
+        }
+
+        .back-btn {
+            margin-top: 50px;
+            padding: 10px 30px;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            background: transparent;
+            cursor: pointer;
+            font-family: var(--font-sans);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover {
+            background: var(--gold);
+            color: var(--obsidian);
+        }
+
+        /* 애니메이션 */
+        @keyframes blink {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* 스크롤바 커스텀 */
+        #content::-webkit-scrollbar { width: 5px; }
+        #content::-webkit-scrollbar-track { background: var(--obsidian); }
+        #content::-webkit-scrollbar-thumb { background: var(--gold); }
+
+    </style>
+</head>
+<body>
+
+    <section id="hero" class="active" onclick="goToSelection()">
+        <div class="hero-text">
+            <h2>세계를 구원한 최강의 용사</h2>
+            <h1>젠</h1>
+            <p>"내 품을 벗어나면 너는 죽을 수도 있어.<br>그냥 그것만 기억해"</p>
+        </div>
+        <div class="click-guide">CLICK TO START</div>
+    </section>
+
+    <section id="selection">
+        <div class="select-area" onclick="showStory('origin')">
+            <h2>여정의시작</h2>
+            <p class="area-desc">THE BEGINNING</p>
+        </div>
+        <div class="select-area" style="background-color: #111;" onclick="showStory('prologue')">
+            <h2 style="color: #666;">기록열기</h2>
+            <p class="area-desc">ORIGIN STORY</p>
+        </div>
+    </section>
+
+    <section id="content">
+        <div class="story-header">
+            <h3 id="story-category">Category</h3>
+            <h1 id="story-title">Title</h1>
+        </div>
+        <div class="story-body" id="story-text">
+            </div>
+        <button class="back-btn" onclick="goToSelection()">목록으로 돌아가기</button>
+    </section>
+
+    <script>
+        const sections = document.querySelectorAll('section');
+        const hero = document.getElementById('hero');
+        const selection = document.getElementById('selection');
+        const content = document.getElementById('content');
+
+        const storyTitle = document.getElementById('story-title');
+        const storyCategory = document.getElementById('story-category');
+        const storyText = document.getElementById('story-text');
+
+        // 섹션 전환 함수
+        function switchSection(targetSection) {
+            sections.forEach(s => s.classList.remove('active'));
+            targetSection.classList.add('active');
+        }
+
+        // 1 -> 2 이동
+        function goToSelection() {
+            switchSection(selection);
+        }
+
+// 2 -> 3 이동 (스토리 출력)
+        function showStory(type) {
+            if(type === 'origin') {
+                storyCategory.innerText = "프롤로그";
+                storyTitle.innerText = "균열";
+                storyText.innerText = `놀랍게도, 세상은 아무 일 없었다는 듯 평온했다.
+
+악신은 비명을 지르며 불타올랐고, 그것이 내뿜던 심연의 냉기는 대륙을 집어삼킬 듯했지만, 마지막 순간 너에게로 스며들었다. 나는 그 대가를 안다. 네가 감내한 것은 단순한 상처가 아니라, 이 세계의 맹목적인 악의였다. 노예로 살며 숱한 피를 보았지만, 네 몸으로 스며드는 그 검은 형상을 보았을 때처럼 내 손이 떨린 적은 없었다.
+
+'아닐 거야. 내가 잘못 본 거야.'
+
+어쩌면 그것은 내가 가장 두려워하는 것을 투과한 환영일지도 모른다. 그러길 바랐다. 하지만 대부분의 현실은 그보다 최악으로 찾아온다.
+
+사제들이 신전 앞에서 승리를 자축하며 기도를 올렸다. 온 거리는 축제 분위기로 가득했다. 허망했다. 진짜 구원은 나에게 없었다. 나는 여관 바닥에 앉아, 정신을 잃고 누워있는 너를 향해 타오르는 듯한 시선을 거두지 못했다. 네 뺨을 쓸어내리는 내 거친 손가락이, 죄책감 때문인지 알 수 없는 갈망 때문인지 번들거렸다.
+
+세상은 여전히 아름다웠다. 하지만 내겐 그 아름다움이 위협이었다. 스쳐 지나가는 바람, 머리 위로 쏟아지는 햇살, 발밑의 풀 한 포기까지. 이 세계의 모든 것이 너를 해치려 호시탐탐 기회를 노리고 있었다. 내게 남은 삶의 이유는 오직 하나, 이 지옥 같은 불운의 소용돌이 속에서 너를 지켜내는 것뿐이었다.
+
+나는 간결하고 맹목적으로 맹세했다.
+
+너를 절대 놓지 않겠노라고.
+
+세상은 이 승리로 인해 평화를 만끽하겠지만, 나는 그 평화를 믿지 않는다. 나는 내 능력을 믿고, 오직 내 품만이 네가 유일하게 안전할 수 있는 성역임을 믿는다.
+
+내가 널 사랑하는가? 그런 건 중요하지 않다. 아니, 그건 사랑일 리 없다. 단지 내 명예와 책임을 완수하기 위한 강박일 뿐.
+
+내 능력이 닿는 한, 너를 위해서라면 무엇이든 될 것이다. 네가 다시는 땅을 딛지 않게 하리라. 나는 너를 위해 이 세계 전체와 싸울 준비가 되어 있다.`; 
+            } else {
+                storyCategory.innerText = "배경 스토리";
+                storyTitle.innerText = "모래와 피";
+                storyText.innerText = `놀랍게도, 나는 단 한 번도 패배를 예감한 적이 없다.
+
+투기장의 관중들은 이대로 내가 사자의 발톱에 찢기거나, 북부 야만인의 도끼에 머리가 깨지는 건 아닌지 노심초사하며 판돈을 걸었다. 어지간한 인간은 패전국의 낙인이 찍힌 채 노예의 삶을 버텨내지 못하고 스스로 무너진다. 하지만 나는 이를 악물고 상상할 수 없는 갈증과 모멸을 견뎌냈고, 나를 비웃는 귀족들을 향해 피 섞인 침을 뱉어냈다. 나는 차가운 돌바닥에 앉아 희미한 횃불 옆에서 몸을 웅크린 채 다음 경기를 기다리곤 했다. 승리의 고양감 따위는 사라진 지 오래였다. 그저 살아있다는 증거를 찾기 위해 강해졌을 뿐이다.
+
+희한하게도 투기장의 주인들은 내게 별다른 제약을 두지 않았다. 나갈 수 있는 돈은 이미 수년 전에 벌어다 주었으니까. 하지만 나는 나가지 않았다. 이 철창 너머에 내가 서 있어야 할 땅도, 나를 불러줄 이름도 남아있지 않았기 때문이다. 그럼에도 살아있는 인간이라는 허물을 쓰고 싶었다. 목표를 잃은 인간은 죽은 것이나 다름없다기에, 강해지는 것만을 유일한 목표라 규정했다. 목적 없는 강함이 가져올 결말을 알았음에도.
+
+그때 나타난 네 눈은 내가 본 것 중 가장 형편없고 어리석은 빛을 띠고 있었다.
+
+사람들은 내 근육과 검술을 보며 금화를 계산했지만, 너는 내 눈을 보며 실없는 소리를 지껄였다. 같이 악신을 잡으러 가자느니, 내 동료가 되어달라느니. 투기장의 미친놈들도 그런 농담은 하지 않았다. 너는 내게 검을 쥐는 법 대신 깃펜 쥐는 법을 가르치려 들었고, 피 냄새 진동하는 내 막사에 앉아 딱딱한 글자가 가득한 책을 읽어주곤 했다. 참으로 보잘것없고 바보 같은 광경이었다.
+
+나는 간결하고 냉소적으로 대답했다.
+"미쳤군."
+
+하지만 네 눈은 가늘어질 뿐, 그 고집스러운 빛을 거두지 않았다. 이내 너는 다시 내 곁에 앉아 알아듣지도 못할 고전 서사시를 읊기 시작했다.
+나는 수건으로 검의 핏자국을 닦는 척하며 네 목소리에 귀를 기울였다. 이 투기장은 조만간 버릴 것이다. 네가 말하는 그 터무니없는 여정에 몸을 던질 생각이다.
+
+아무도 이 투기장의 한 노예가 사라진 이유를 이해하지 못할 것이고, 내가 이곳에서 흘린 피를 기억하는 이조차 없겠지.
+
+───
+
+악신의 심장은 생각보다 검고 끈적였다.
+대륙을 공포로 몰아넣었던 신의 죽음은 허망할 정도로 고요했다. 네가 내준 길을 따라 나는 마지막 일격을 가했고, 우리는 무너지는 신전의 잔해 속에서 서로의 먼지투성이 얼굴을 보며 웃었다. 어린 아이들이나 믿을 법한 영웅담의 주인공이 된 기분이었다.
+
+너는 승전보를 알리는 공문서를 앞에 두고 아이처럼 기뻐했다. 하지만 나는 여전히 그 종이 위에 휘갈겨진 검은 선들이 무엇을 의미하는지 알지 못한다.
+
+"아직도 글자를 못 읽는 거야? 하여간 못 말린다니까! 이리와 앉아 같이 읽자."
+
+네가 장난스럽게 웃으며 내뱉는 말에 나는 그저 어깨를 으쓱할 뿐이다. 굳이 배우고 싶지도 않다. 내가 글을 깨우치는 순간, 네가 내 곁에서 목소리를 들려줄 명분 하나가 사라질지도 모르니까. 나는 적절한 거리를 유지하며 네가 읽어 내려가는 문장들의 리듬을 감상했다.
+
+"어딜 그렇게 봐? 내 얼굴에 뭐라도 묻었어?"
+
+누굴 보길래 그렇게 바보 같은 미소를 짓는 걸까.
+
+───
+
+방 안의 촛불이 일렁이며 벽면에 긴 그림자를 만들어낸다. 이곳, 이름 없는 여관의 낡은 탁자 위에서 나는 네가 읽어주는 세상을 꿈꾼다.
+내 과거의 파편들은 저 멀리 패전국의 잿더미 속에 흩어져 있다. 이 순간에도 세상은 누군가의 음모와 전쟁으로 들끓고 있겠지만, 내게는 이 작은 방안의 적막과 네 목소리가 더 실재(實在)처럼 느껴진다.
+
+그렇다면 스스로에게 화두를 던질 때다. 나는 무엇을 원하는가?
+글자 따위는 중요하지 않다. 나는 네가 읽어주는 세상 속에 살고 싶다.
+그러니 계속 내 옆에 있어 줘.
+
+무엇이든 상관없으니, 네가 내 곁에서 계속 읽어주면 좋겠어.`;
+            }
+            switchSection(content);
+        }
+    </script>
+</body>
+</html>
